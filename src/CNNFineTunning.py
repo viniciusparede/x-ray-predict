@@ -3,15 +3,19 @@ from keras.applications import ResNet50
 from keras.models import Model
 from keras.layers import Dense, GlobalAveragePooling2D
 
-# Load the CIFAR-10 dataset
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+from SPRXRay import SPRXRay
+
+# Load the SPR X-Ray dataset
+data = SPRXRay()
+
+(x_train, y_train), (x_test, y_test) = data.load_data(type_of_predict="gender")
 
 # Normalize the images
 x_train = x_train / 255.0
 x_test = x_test / 255.0
 
 # Load the ResNet50 model without the top layer (include_top=False)
-base_model = ResNet50(weights="imagenet", include_top=False, input_shape=(32, 32, 3))
+base_model = ResNet50(weights="imagenet", include_top=False, input_shape=(256, 256, 3))
 
 # Add a global spatial average pooling layer
 x = base_model.output
@@ -21,7 +25,7 @@ x = GlobalAveragePooling2D()(x)
 x = Dense(1024, activation="relu")(x)
 
 # Add a logistic layer with 10 classes (for CIFAR-10)
-predictions = Dense(10, activation="softmax")(x)
+predictions = Dense(2, activation="softmax")(x)
 
 # This is the model we will train
 model = Model(inputs=base_model.input, outputs=predictions)
