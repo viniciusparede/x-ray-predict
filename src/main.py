@@ -1,11 +1,36 @@
-from sklearn.model_selection import train_test_split
 from SPRXRay import SPRXRay
+from CNNFineTunning import XRayModelTrainer
 
+
+from utils.read_image import read_image
+from utils.image_show import image_show
+
+import numpy as np
 
 if __name__ == "__main__":
-    data = SPRXRay()
-    (X_train, y_train), (X_test, y_test) = data.load_data(type_of_predict="age")
-    
+    # data = SPRXRay()
+    trainer = XRayModelTrainer()
 
+    gender_model, age_model = trainer.train_models()
 
-    print(X_train.shape)
+    img_path = (
+        "/home/vinicius/repositories/x-ray-predict/data/kaggle/kaggle/train/008386.png"
+    )
+
+    image_show(img_path)
+    img = read_image(img_path)
+
+    img = np.expand_dims(img, axis=0)
+
+    img = img / 255.0
+
+    print(img)
+
+    prediction = age_model.predict(img)
+    print(int(prediction[0][0]))
+
+    prediction = gender_model.predict(img)
+    if prediction[0] < 0.5:
+        print("Male")
+    else:
+        print("Female")
